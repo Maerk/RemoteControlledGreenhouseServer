@@ -1,0 +1,182 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+//        Copyright 2018 Marco De Nicolo
+//
+
+doctype html
+html
+	head
+		meta(charset = "UTF-8")
+		meta( name = "viewport", content="width=device-width, initial-scale=1")
+		link(rel="stylesheet", href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+		script(src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
+		script(src="/socket.io/socket.io.js")
+		link(rel="stylesheet",href="global.css")
+		title RemoteControlledGreenhouse
+		script.
+			var loc = window.location;
+			var socket = io.connect(loc.hostname+':'+loc.port);
+			socket.on('connect', function(data) {});
+
+			socket.on('temperature',function(data){
+				document.getElementById("temp").innerHTML = data;
+			});
+			socket.on('envHumidity',function(data){
+				document.getElementById("ehumi").innerHTML = data;
+			});
+			socket.on('groundHumidity',function(data){
+				document.getElementById("ghumi").innerHTML = data;
+			});
+			socket.on('waterLevel',function(data){
+				document.getElementById("wlev").innerHTML = data;
+			});
+			socket.on('lightSensor',function(data){
+				document.getElementById("lsens").innerHTML = data;
+			});
+			socket.on('lightState',function(data){
+				document.getElementById("slight").innerHTML = data;
+			});
+			socket.on('fanState',function(data){
+				document.getElementById("sfan").innerHTML = data;
+			});
+			socket.on('valveState',function(data){
+				document.getElementById("svalve").innerHTML = data;
+			});
+			socket.on('irrigationState',function(data){
+				document.getElementById("sirri").innerHTML = data;
+			});
+			socket.on('weekTimeTable',function(data){
+				var node = document.getElementById("wtt");
+				while (node.hasChildNodes())
+			        node.removeChild(node.firstChild);
+				data.forEach(function(tt){
+					var row = document.createElement("div");
+					row.className = "row thumbnail no_pad_mar";
+					for(var ind in tt){
+						var col = document.createElement("div");
+						col.className = "col-xs-3";
+						col.appendChild(document.createTextNode(tt[ind]));
+						row.appendChild(col);
+					}
+					node.appendChild(row);
+				});
+			});
+
+			function changelight(){
+				var lig = ((document.getElementById("slight").innerHTML == '0')? 1 : 0);
+				socket.emit("light", lig);
+			}
+
+			function changesirri(){
+				var irr = ((document.getElementById("sirri").innerHTML == '0')? 1 : 0);
+				socket.emit("setIrrigationTime", irr);
+			}
+
+			function setval(){
+				socket.emit(document.getElementById("set").value, document.getElementById("setv").value);
+			}
+
+			function addtt(){
+				socket.emit("addTT", [document.getElementById("day").value, document.getElementById("hour").value ,document.getElementById("minute").value]);
+			}
+
+			function remtt(){
+				socket.emit("remTT", document.getElementById("index").value);
+			}
+	body
+		div.container
+			div.row.std_marg
+				div.col-xs-12.no_pad_mar
+					form(action=".", method="post")
+						button.btn.btn-primary(name="logout") Logout
+			div.row.thumbnail
+				div.col-xs-6 Temperature[°C]:
+				div.col-xs-6#temp #{sensors.temperature}
+			div.row.thumbnail
+				div.col-xs-6 Environment Humidity[%]:
+				div.col-xs-6#ehumi #{sensors.envHumidity}
+			div.row.thumbnail
+				div.col-xs-6 Ground Humidity:
+				div.col-xs-6#ghumi #{sensors.groundHumidity}
+			div.row.thumbnail
+				div.col-xs-6 Water Level:
+				div.col-xs-6#wlev #{sensors.waterLevel}
+			div.row.thumbnail
+				div.col-xs-6 Light Sensor:
+				div.col-xs-6#lsens #{sensors.lightSensor}
+			div.row
+				div.col-xs-12.col-sm-4.thumbnail
+					div.col-xs-6.col-lg-6 Light:
+					if lev
+						div.col-xs-6.col-lg-3#slight #{sensors.lightState}
+						div.col-xs-12.col-lg-3.text-right
+							button.btn.btn-danger(onclick="changelight()") CHANGE
+					else
+						div.col-xs-6.col-md-6#slight #{sensors.lightState}
+				div.col-xs-12.col-sm-4.thumbnail
+					div.col-xs-6 Fan:
+					div.col-xs-6#sfan #{sensors.fanState}
+				div.col-xs-12.col-sm-4.thumbnail
+					div.col-xs-6  Valve:
+					div.col-xs-6#svalve #{sensors.valveState}
+			div.row.thumbnail
+				div.col-xs-6.col-sm-6 Automatic Irrigation:
+				if lev
+					div.col-xs-6.col-sm-3#sirri #{sensors.irrigationState}
+					div.col-xs-12.col-sm-3.text-right
+						button.btn.btn-danger(onclick="changesirri()") CHANGE
+				else
+					div.col-xs-6.col-sm-6#sirri #{sensors.irrigationState}
+			if lev
+				div.row.thumbnail
+					div.col-xs-12.col-sm-6
+						select.form-control#set
+							option(value="setmaxtemp") Set Max Temperature
+							option(value="setmintemp") Set Min Temperature
+							option(value="setmaxehumi") Set Max Environment Humidity
+							option(value="setminehumi") Set Min Environment Humidity
+							option(value="setmaxghumi") Set Max Ground Humidity
+							option(value="setminghumi") Set Min Ground Humidity
+					div.col-xs-12.col-sm-3
+						input.form-control#setv(type="number", step="0.1")
+					div.col-xs-12.col-sm-3.text-right
+						button.btn.btn-danger(onclick="setval()") SET
+				div.row.thumbnail
+					div.col-xs-12.col-md-12.col-lg-2 New Watering:
+					div.col-xs-12.col-md-4.col-lg-3
+						div.col-xs-8.text-right Day Of Week:
+						div.col-xs-4
+							input.form-control#day(type="number", min="0", max="6" step="1")
+					div.col-xs-12.col-md-4.col-lg-3
+						div.col-xs-8.text-right Hour:
+						div.col-xs-4
+							input.form-control#hour(type="number", min="0", max="23" step="1")
+					div.col-xs-12.col-md-4.col-lg-3
+						div.col-xs-8.text-right Minute:
+						div.col-xs-4
+							input.form-control#minute(type="number", min="0", max="59" step="1")
+					div.col-xs-12.col-md-12.col-lg-1.text-right
+						button.btn.btn-danger(onclick="addtt()") ADD
+				div.row.thumbnail
+					div.col-xs-12.col-sm-5 Remove Watering:
+					div.col-xs-12.col-sm-5
+						div.col-xs-8.text-right Index:
+						div.col-xs-4
+							input.form-control#index(type="number", min="0" step="1")
+					div.col-xs-12.col-sm-2.text-right
+						button.btn.btn-danger(onclick="remtt()") REMOVE
+			div.row.thumbnail.text-center Week Time Table:
+				div.container
+					div.row.no_pad_mar
+						div.col-xs-3 INDEX
+						div.col-xs-3 DAY
+						div.col-xs-3 HOUR
+						div.col-xs-3 MINUTE
+					div#wtt
+						each tt in sensors.weekTimeTable
+							div.row.thumbnail.no_pad_mar
+								each val in tt
+									div.col-xs-3= val
