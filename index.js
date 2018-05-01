@@ -296,7 +296,7 @@ app.post('/', function(req, res) {
             });
         })
         .catch(function (error) { console.log(error);
-            res.sendFile(__dirname + '/public/index.html');
+            res.sendFile(__dirname + '/public/login.html');
         });
     }
     else if(typeof req.body.connect != "undefined" && typeof req.body.ip != "undefined"){
