@@ -70,6 +70,16 @@ html
 				socket.emit("light", lig);
 			}
 
+			function startfan(){
+				var sec = document.getElementById("sfan").value;
+				socket.emit("fan", sec);
+			}
+
+			function startvalve(){
+				var sec = document.getElementById("svalve").value;
+				socket.emit("valve", sec);
+			}
+
 			function changesirri(){
 				var irr = ((document.getElementById("sirri").innerHTML == '0')? 1 : 0);
 				socket.emit("setIrrigationTime", irr);
@@ -115,13 +125,27 @@ html
 						div.col-xs-12.col-lg-3.text-right
 							button.btn.btn-danger(onclick="changelight()") CHANGE
 					else
-						div.col-xs-6.col-md-6#slight #{sensors.lightState}
+						div.col-xs-6.col-lg-6#slight #{sensors.lightState}
 				div.col-xs-12.col-sm-4.thumbnail
-					div.col-xs-6 Fan:
-					div.col-xs-6#sfan #{sensors.fanState}
+					div.col-xs-6.col-lg-3 Fan:
+					if lev
+						div.col-xs-6.col-lg-1#sirri #{sensors.fanState}
+						div.col-xs-12.col-lg-4
+							input.form-control(type="number", min="0", step="1", placeholder="seconds")#sfan
+						div.col-xs-12.col-lg-4.text-right
+							button.btn.btn-danger(onclick="startfan()") START
+					else
+						div.col-xs-6.col-lg-9#sfan #{sensors.fanState}
 				div.col-xs-12.col-sm-4.thumbnail
-					div.col-xs-6  Valve:
-					div.col-xs-6#svalve #{sensors.valveState}
+					div.col-xs-6.col-lg-3  Valve:
+					if lev
+						div.col-xs-6.col-lg-1#sirri #{sensors.valveState}
+						div.col-xs-12.col-lg-4
+							input.form-control(type="number", min="0", step="1", placeholder="seconds")#svalve
+						div.col-xs-12.col-lg-4.text-right
+							button.btn.btn-danger(onclick="startvalve()") START
+					else
+						div.col-xs-6.col-lg-9#svalve #{sensors.valveState}
 			div.row.thumbnail
 				div.col-xs-6.col-sm-6 Automatic Irrigation:
 				if lev

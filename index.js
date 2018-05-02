@@ -12,7 +12,7 @@ var osc = require('osc');
 var pgp = require('pg-promise')(/*options*/);
 var db = pgp('postgres://user:password@127.0.0.1:5432/RCGS'); //change user and password
 var fs = require('fs');
-const bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt');
 var app = express();
 var server = require('http').createServer(app);
 /*var options = {
@@ -79,6 +79,18 @@ io.on('connection', function(client) {
         client.on("light",function(data){
             if(GH.has(gh_ip)){
                 GH.get(gh_ip).oscClient.send({address:"/light", args: [{type: "i", value: data}]});
+                updateAll(gh_ip);
+            }
+        });
+        client.on("fan",function(data){
+            if(GH.has(gh_ip)){
+                GH.get(gh_ip).oscClient.send({address:"/startFan", args: [{type: "i", value: data}]});
+                updateAll(gh_ip);
+            }
+        });
+        client.on("valve",function(data){
+            if(GH.has(gh_ip)){
+                GH.get(gh_ip).oscClient.send({address:"/startIrrigation", args: [{type: "i", value: data}]});
                 updateAll(gh_ip);
             }
         });
