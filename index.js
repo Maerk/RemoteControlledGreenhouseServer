@@ -100,6 +100,12 @@ io.on('connection', function(client) {
                 updateAll(gh_ip);
             }
         });
+	client.on("autoLight",function(data){
+            if(GH.has(gh_ip)){
+                GH.get(gh_ip).oscClient.send({address:"/autoLight", args: [{type: "i", value: data}]});
+                updateAll(gh_ip);
+            }
+        });
         client.on("addTT",function(data){
             if(GH.has(gh_ip)){
                 GH.get(gh_ip).oscClient.send({address:"/addIrrigationTime", args: [{type: "i", value: data[0]},{type: "i", value: data[1]},{type: "i", value: data[2]}]});
@@ -171,9 +177,9 @@ BroadOSC.on("message", function(oscMsg){
                     switch (oscMsg.address) {
                         case "/temperature":
                             if(clients.has(ip))
-                                clients.get(ip).forEach(function(client){client.emit("temperature",oscMsg.args[0])});
-                            GH.get(ip).sensors.temperature = oscMsg.args[0];
-                            console.log("temperature: ", oscMsg.args[0]);
+                                clients.get(ip).forEach(function(client){client.emit("temperature",oscMsg.args[0].toFixed(1))});
+                            GH.get(ip).sensors.temperature = oscMsg.args[0].toFixed(1);
+                            console.log("temperature: ", oscMsg.args[0].toFixed(1));
                             break;
                         case "/envHumidity":
                             if(clients.has(ip))
@@ -250,6 +256,48 @@ BroadOSC.on("message", function(oscMsg){
                                 clients.get(ip).forEach(function(client){client.emit("irrigationState",oscMsg.args[0])});
                             GH.get(ip).sensors.irrigationState = oscMsg.args[0];
                             console.log("irrigationState: ", oscMsg.args[0]);
+                            break;
+			case "/maxTemperature":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("maxTemperature",oscMsg.args[0].toFixed(1))});
+                            GH.get(ip).sensors.maxTemperature = oscMsg.args[0].toFixed(1);
+                            console.log("maxTemperature: ", oscMsg.args[0].toFixed(1));
+                            break;
+			case "/minTemperature":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("minTemperature",oscMsg.args[0].toFixed(1))});
+                            GH.get(ip).sensors.minTemperature = oscMsg.args[0].toFixed(1);
+                            console.log("minTemperature: ", oscMsg.args[0].toFixed(1));
+                            break;
+			case "/maxEnvHumidity":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("maxEnvHumidity",oscMsg.args[0])});
+                            GH.get(ip).sensors.maxEnvHumidity = oscMsg.args[0];
+                            console.log("maxEnvHumidity: ", oscMsg.args[0]);
+                            break;
+			case "/minEnvHumidity":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("minEnvHumidity",oscMsg.args[0])});
+                            GH.get(ip).sensors.minEnvHumidity = oscMsg.args[0];
+                            console.log("minEnvHumidity: ", oscMsg.args[0]);
+                            break;
+			case "/maxGroundHumidity":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("maxGroundHumidity",oscMsg.args[0])});
+                            GH.get(ip).sensors.maxGroundHumidity = oscMsg.args[0];
+                            console.log("maxGroundHumidity: ", oscMsg.args[0]);
+                            break;
+			case "/minGroundHumidity":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("minGroundHumidity",oscMsg.args[0])});
+                            GH.get(ip).sensors.minGroundHumidity = oscMsg.args[0];
+                            console.log("minGroundHumidity: ", oscMsg.args[0]);
+                            break;
+			case "/autoLight":
+                            if(clients.has(ip))
+                                clients.get(ip).forEach(function(client){client.emit("autoLight",oscMsg.args[0])});
+                            GH.get(ip).sensors.autoLight = oscMsg.args[0];
+                            console.log("autoLight: ", oscMsg.args[0]);
                             break;
                         case "/weekTimeTable":
                             var tt = [];

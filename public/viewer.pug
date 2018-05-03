@@ -40,13 +40,37 @@ html
 				document.getElementById("slight").innerHTML = data;
 			});
 			socket.on('fanState',function(data){
-				document.getElementById("sfan").innerHTML = data;
+				document.getElementById("fan").innerHTML = data;
 			});
 			socket.on('valveState',function(data){
-				document.getElementById("svalve").innerHTML = data;
+				document.getElementById("valve").innerHTML = data;
 			});
 			socket.on('irrigationState',function(data){
 				document.getElementById("sirri").innerHTML = data;
+			});
+			socket.on('autoLight',function(data){
+				if(data)
+					document.getElementById("abut").innerHTML = "MANUAL";
+				else
+					document.getElementById("abut").innerHTML = "AUTO";
+			});
+			socket.on('minTemperature',function(data){
+				document.getElementById("mint").innerHTML = data;
+			});
+			socket.on('maxTemperature',function(data){
+				document.getElementById("maxt").innerHTML = data;
+			});
+			socket.on('minEnvHumidity',function(data){
+				document.getElementById("mineh").innerHTML = data;
+			});
+			socket.on('maxEnvHumidity',function(data){
+				document.getElementById("maxeh").innerHTML = data;
+			});
+			socket.on('minGroundHumidity',function(data){
+				document.getElementById("mingh").innerHTML = data;
+			});
+			socket.on('maxGroundHumidity',function(data){
+				document.getElementById("maxgh").innerHTML = data;
 			});
 			socket.on('weekTimeTable',function(data){
 				var node = document.getElementById("wtt");
@@ -84,6 +108,11 @@ html
 				var irr = ((document.getElementById("sirri").innerHTML == '0')? 1 : 0);
 				socket.emit("setIrrigationTime", irr);
 			}
+			
+			function changeauto(){
+				var al = ((document.getElementById("abut").innerHTML == 'AUTO')? 1 : 0);
+				socket.emit("autoLight", al);
+			}
 
 			function setval(){
 				socket.emit(document.getElementById("set").value, document.getElementById("setv").value);
@@ -117,90 +146,116 @@ html
 			div.row.thumbnail
 				div.col-xs-6 Light Sensor:
 				div.col-xs-6#lsens #{sensors.lightSensor}
-			div.row
-				div.col-xs-12.col-sm-4.thumbnail
-					div.col-xs-6.col-lg-6 Light:
+			div.row(style="margin-bottom: 20px;")
+				div.col-xs-12.no_pad_mar
+					button.btn.btn-primary(data-toggle="collapse", data-target="#adv") Advanced
+			div.collapse#adv
+				div.row
+					div.col-xs-12.col-sm-4.thumbnail
+						div.col-xs-6.col-lg-3 Light:
+						if lev
+							div.col-xs-6.col-lg-2#slight #{sensors.lightState}
+							div.col-xs-12.col-lg-7.text-right
+								div.btn-group(role="group")
+									if sensors.autoLight
+										button.btn.btn-danger#abut(onclick="changeauto()") MANUAL
+									else
+										button.btn.btn-danger#abut(onclick="changeauto()") AUTO
+									button.btn.btn-danger(onclick="changelight()") CHANGE
+						else
+							div.col-xs-6.col-lg-9#slight #{sensors.lightState}
+					div.col-xs-12.col-sm-4.thumbnail
+						div.col-xs-6.col-lg-3 Fan:
+						if lev
+							div.col-xs-6.col-lg-1#fan #{sensors.fanState}
+							div.col-xs-12.col-lg-4
+								input.form-control(type="number", min="0", step="1", placeholder="seconds")#sfan
+							div.col-xs-12.col-lg-4.text-right
+								button.btn.btn-danger(onclick="startfan()") START
+						else
+							div.col-xs-6.col-lg-9#fan #{sensors.fanState}
+					div.col-xs-12.col-sm-4.thumbnail
+						div.col-xs-6.col-lg-3  Valve:
+						if lev
+							div.col-xs-6.col-lg-1#valve #{sensors.valveState}
+							div.col-xs-12.col-lg-4
+								input.form-control(type="number", min="0", step="1", placeholder="seconds")#svalve
+							div.col-xs-12.col-lg-4.text-right
+								button.btn.btn-danger(onclick="startvalve()") START
+						else
+							div.col-xs-6.col-lg-9#valve #{sensors.valveState}
+				div.row.thumbnail
+					div.col-xs-6.col-sm-6 Automatic Irrigation:
 					if lev
-						div.col-xs-6.col-lg-3#slight #{sensors.lightState}
-						div.col-xs-12.col-lg-3.text-right
-							button.btn.btn-danger(onclick="changelight()") CHANGE
+						div.col-xs-6.col-sm-3#sirri #{sensors.irrigationState}
+						div.col-xs-12.col-sm-3.text-right
+							button.btn.btn-danger(onclick="changesirri()") CHANGE
 					else
-						div.col-xs-6.col-lg-6#slight #{sensors.lightState}
-				div.col-xs-12.col-sm-4.thumbnail
-					div.col-xs-6.col-lg-3 Fan:
-					if lev
-						div.col-xs-6.col-lg-1#sirri #{sensors.fanState}
-						div.col-xs-12.col-lg-4
-							input.form-control(type="number", min="0", step="1", placeholder="seconds")#sfan
-						div.col-xs-12.col-lg-4.text-right
-							button.btn.btn-danger(onclick="startfan()") START
-					else
-						div.col-xs-6.col-lg-9#sfan #{sensors.fanState}
-				div.col-xs-12.col-sm-4.thumbnail
-					div.col-xs-6.col-lg-3  Valve:
-					if lev
-						div.col-xs-6.col-lg-1#sirri #{sensors.valveState}
-						div.col-xs-12.col-lg-4
-							input.form-control(type="number", min="0", step="1", placeholder="seconds")#svalve
-						div.col-xs-12.col-lg-4.text-right
-							button.btn.btn-danger(onclick="startvalve()") START
-					else
-						div.col-xs-6.col-lg-9#svalve #{sensors.valveState}
-			div.row.thumbnail
-				div.col-xs-6.col-sm-6 Automatic Irrigation:
+						div.col-xs-6.col-sm-6#sirri #{sensors.irrigationState}
 				if lev
-					div.col-xs-6.col-sm-3#sirri #{sensors.irrigationState}
-					div.col-xs-12.col-sm-3.text-right
-						button.btn.btn-danger(onclick="changesirri()") CHANGE
-				else
-					div.col-xs-6.col-sm-6#sirri #{sensors.irrigationState}
-			if lev
-				div.row.thumbnail
-					div.col-xs-12.col-sm-6
-						select.form-control#set
-							option(value="setmaxtemp") Set Max Temperature
-							option(value="setmintemp") Set Min Temperature
-							option(value="setmaxehumi") Set Max Environment Humidity
-							option(value="setminehumi") Set Min Environment Humidity
-							option(value="setmaxghumi") Set Max Ground Humidity
-							option(value="setminghumi") Set Min Ground Humidity
-					div.col-xs-12.col-sm-3
-						input.form-control#setv(type="number", step="0.1")
-					div.col-xs-12.col-sm-3.text-right
-						button.btn.btn-danger(onclick="setval()") SET
-				div.row.thumbnail
-					div.col-xs-12.col-md-12.col-lg-2 New Watering:
-					div.col-xs-12.col-md-4.col-lg-3
-						div.col-xs-8.text-right Day Of Week:
-						div.col-xs-4
-							input.form-control#day(type="number", min="0", max="6" step="1")
-					div.col-xs-12.col-md-4.col-lg-3
-						div.col-xs-8.text-right Hour:
-						div.col-xs-4
-							input.form-control#hour(type="number", min="0", max="23" step="1")
-					div.col-xs-12.col-md-4.col-lg-3
-						div.col-xs-8.text-right Minute:
-						div.col-xs-4
-							input.form-control#minute(type="number", min="0", max="59" step="1")
-					div.col-xs-12.col-md-12.col-lg-1.text-right
-						button.btn.btn-danger(onclick="addtt()") ADD
-				div.row.thumbnail
-					div.col-xs-12.col-sm-5 Remove Watering:
-					div.col-xs-12.col-sm-5
-						div.col-xs-8.text-right Index:
-						div.col-xs-4
-							input.form-control#index(type="number", min="0" step="1")
-					div.col-xs-12.col-sm-2.text-right
-						button.btn.btn-danger(onclick="remtt()") REMOVE
-			div.row.thumbnail.text-center Week Time Table:
-				div.container
-					div.row.no_pad_mar
-						div.col-xs-3 INDEX
-						div.col-xs-3 DAY
-						div.col-xs-3 HOUR
-						div.col-xs-3 MINUTE
-					div#wtt
-						each tt in sensors.weekTimeTable
-							div.row.thumbnail.no_pad_mar
-								each val in tt
-									div.col-xs-3= val
+					div.row.thumbnail
+						div.col-xs-12.col-sm-6
+							select.form-control#set
+								option(value="setmaxtemp") Set Max Temperature
+								option(value="setmintemp") Set Min Temperature
+								option(value="setmaxehumi") Set Max Environment Humidity
+								option(value="setminehumi") Set Min Environment Humidity
+								option(value="setmaxghumi") Set Max Ground Humidity
+								option(value="setminghumi") Set Min Ground Humidity
+						div.col-xs-12.col-sm-3
+							input.form-control#setv(type="number", step="0.1")
+						div.col-xs-12.col-sm-3.text-right
+							button.btn.btn-danger(onclick="setval()") SET
+					div.row.thumbnail.text-center
+						div.row.no_pad_mar
+							div.col-xs-4 Type
+							div.col-xs-4 Min
+							div.col-xs-4 Max
+						div.row.thumbnail.no_pad_mar
+							div.col-xs-4 Temperature
+							div.col-xs-4#mint #{sensors.minTemperature}
+							div.col-xs-4#maxt #{sensors.maxTemperature}
+						div.row.thumbnail.no_pad_mar
+							div.col-xs-4 Environmental Humidity
+							div.col-xs-4#mineh #{sensors.minEnvHumidity}
+							div.col-xs-4#maxeh #{sensors.maxEnvHumidity}
+						div.row.thumbnail.no_pad_mar
+							div.col-xs-4 Ground Humidity
+							div.col-xs-4#mingh #{sensors.minGroundHumidity}
+							div.col-xs-4#maxgh #{sensors.maxGroundHumidity}
+					div.row.thumbnail
+						div.col-xs-12.col-md-12.col-lg-2 New Watering:
+						div.col-xs-12.col-md-4.col-lg-3
+							div.col-xs-8.text-right Day Of Week:
+							div.col-xs-4
+								input.form-control#day(type="number", min="0", max="6", step="1")
+						div.col-xs-12.col-md-4.col-lg-3
+							div.col-xs-8.text-right Hour:
+							div.col-xs-4
+								input.form-control#hour(type="number", min="0", max="23", step="1")
+						div.col-xs-12.col-md-4.col-lg-3
+							div.col-xs-8.text-right Minute:
+							div.col-xs-4
+								input.form-control#minute(type="number", min="0", max="59", step="1")
+						div.col-xs-12.col-md-12.col-lg-1.text-right
+							button.btn.btn-danger(onclick="addtt()") ADD
+					div.row.thumbnail
+						div.col-xs-12.col-sm-5 Remove Watering:
+						div.col-xs-12.col-sm-5
+							div.col-xs-8.text-right Index:
+							div.col-xs-4
+								input.form-control#index(type="number", min="0", step="1")
+						div.col-xs-12.col-sm-2.text-right
+							button.btn.btn-danger(onclick="remtt()") REMOVE
+				div.row.thumbnail.text-center Week Time Table:
+					div.container
+						div.row.no_pad_mar
+							div.col-xs-3 INDEX
+							div.col-xs-3 DAY
+							div.col-xs-3 HOUR
+							div.col-xs-3 MINUTE
+						div#wtt
+							each tt in sensors.weekTimeTable
+								div.row.thumbnail.no_pad_mar
+									each val in tt
+										div.col-xs-3= val
