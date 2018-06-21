@@ -7,6 +7,7 @@ with a simple interface.
   * [GREENHOUSE](https://github.com/Maerk/RemoteControlledGreenhouse)
   * [OSC PROTOCOL](https://en.wikipedia.org/wiki/Open_Sound_Control)
 ## Used libraries
+  * [bootstrap](https://getbootstrap.com)
   * [express](https://www.npmjs.com/package/express)
   * [osc](https://www.npmjs.com/package/osc)
   * [pg-promise](https://www.npmjs.com/package/pg-promise)
